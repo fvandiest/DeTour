@@ -102,3 +102,9 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# Python files
+DeTour/credentials.py
+images
+cache
+logs
