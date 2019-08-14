@@ -52,8 +52,6 @@ class Run(object):
         self.__neighbor_factor = neighbor_factor
         self.__user_scoring_factors = self.user_profile['user_scoring_factors']
 
-        # Run the model to generate the outcome attributes
-        self.run()
 
     def run(self):
 
@@ -78,29 +76,31 @@ class Run(object):
         # Allocate the (touristic) graph items to the nodes
         walk_network = walk_network.allocate_items_to_graph(model)
 
-        # Make recommendations
-        recommender = Recommender(self.user_profile)
-        recommender = recommender.set_recommendations(walk_network.bbox)
+        # # Make recommendations
+        # recommender = Recommender(self.user_profile)
+        # recommender = recommender.set_recommendations(walk_network.bbox)
+        #
+        # # Add recommendations to route checkpoints
+        # route = route.add_recommendations(recommender.recommendations)
+        # route = route.set_nearest_nodes(walk_network.network)
+        # route = route.generate_route(walk_network.network)
+        # route = route.set_route_score(walk_network, model)
+        # route = model.optimize_route(walk_network, route)
+        #
+        # # Add route to plot
+        # route_plot = route_plot.add_route(walk_network.network, route)
+        # route_plot = route_plot.plot_statistics(model)
+        # route_plot = route_plot.plot_adjustment_factors(walk_network,
+        #                                                 model.iterative_statistics['adjustment_factors'][-1])
+        # route_plot = route_plot.plot_cockpit(filename=self.__fname, save=True)
+        #
+        # # Set the outcome of the model as attributes of the object
+        # self.route_plot = route_plot.cockpit_figure
+        # self.recommendations = recommender.recommendations
+        #
+        self.route_plot = route_plot
 
-        # Add recommendations to route checkpoints
-        route = route.add_recommendations(recommender.recommendations)
-        route = route.set_nearest_nodes(walk_network.network)
-        route = route.generate_route(walk_network.network)
-        route = route.set_route_score(walk_network, model)
-        route = model.optimize_route(walk_network, route)
-
-        # Add route to plot
-        route_plot = route_plot.add_route(walk_network.network, route)
-        route_plot = route_plot.plot_statistics(model)
-        route_plot = route_plot.plot_adjustment_factors(walk_network,
-                                                        model.iterative_statistics['adjustment_factors'][-1])
-        route_plot = route_plot.plot_cockpit(filename=self.__fname, save=True)
-
-        # Set the outcome of the model as attributes of the object
-        self.route_plot = route_plot.cockpit_figure
-        self.recommendations = recommender.recommendations
-
-        plt.show()
+        return route_plot.fig
         #print(self.recommendations)
 
 

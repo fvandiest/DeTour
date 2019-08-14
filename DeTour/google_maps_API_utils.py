@@ -34,9 +34,12 @@ def set_node_location_data(node, **kwargs):
     if node['geographic_crs'] is None:
         node['gapi_request'] = text_search_request(query=node['query'])
         json_response = requests.get(node['gapi_request']).json()
-        response_data = json_response.get('results')
-        if len(response_data)>0:
-            node['gapi_response'] = response_data[0]
-            location = response_data[0]['geometry']['location']
-            node['geographic_crs'] = (location['lat'],location['lng'])
+        if json_response['status']=='ZERO_RESULTS':
+            raise Exception('Location not found in Google Maps. Please try another location')
+        else:
+            response_data = json_response.get('results')
+            if len(response_data)>0:
+                node['gapi_response'] = response_data[0]
+                location = response_data[0]['geometry']['location']
+                node['geographic_crs'] = (location['lat'],location['lng'])
     return node

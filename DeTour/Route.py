@@ -17,7 +17,8 @@ class Route(object):
 
     """
 
-    def __init__(self, start_query=None, route_checkpoints=None, dummy_route=False, bbox=None):
+    def __init__(self, start_query=None, route_checkpoints=None,
+                 dummy_route=False, bbox=None):
         """
         Initializes the Route object instance
 

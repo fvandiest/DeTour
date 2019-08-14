@@ -9,6 +9,9 @@ from descartes import PolygonPatch
 from shapely.geometry import Polygon, MultiPolygon, Point
 from matplotlib.collections import LineCollection, PatchCollection
 
+import warnings
+import logging
+
 from osmnx import settings
 from osmnx.utils import log, config
 from osmnx.core import add_paths, parse_osm_nodes_paths
@@ -58,6 +61,10 @@ class Plot(object):
         self.statistics_figure = None
         self.adjust_factor_figure = None
         self.cockpit_figure = None
+
+        warnings.filterwarnings('ignore')
+        logger = logging.getLogger()
+        logger.setLevel(logging.ERROR)
 
 
     @process_time
@@ -565,10 +572,13 @@ class Plot(object):
         plot_format = self.plot_format_dict[category]
         if osm_elements is None:
             print('No OSM elements to plot')
-            return ax
+            return self
 
         # Generate GeoPandas DataFrame
         gdf = self.create_footprint_gdf(osm_elements)
+        if gdf is None:
+            log('Empty GDF for {}'.format(category))
+            return self
 
         # Store existing xlims and ylims to reset the adjusted lims later
         xlim = self.ax.get_xlim()
@@ -623,6 +633,7 @@ class Plot(object):
             if 'type' in result and result['type']=='way':
                 nodes = result['nodes']
                 try:
+
                     polygon = Polygon([(vertices[node]['lon'], vertices[node]['lat']) for node in nodes])
                     footprint = {'nodes' : nodes,
                                  'geometry' : polygon}
@@ -635,12 +646,16 @@ class Plot(object):
                 except Exception:
                     log('Polygon of has invalid geometry: {}'.format(nodes))
 
-        gdf = gpd.GeoDataFrame(footprints).T
 
-        # drop all invalid geometries
-        gdf = gdf[gdf['geometry'].is_valid]
+        if footprints != {}:
+            gdf = gpd.GeoDataFrame(footprints).T
 
-        return gdf
+            # drop all invalid geometries
+            gdf = gdf[gdf['geometry'].is_valid]
+
+            return gdf
+        else:
+            return None
 
     @process_time
     def add_nodes(self, osm_data, category, plot_format=None):

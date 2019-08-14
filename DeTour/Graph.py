@@ -178,20 +178,20 @@ class Graph(object):
             items_crs = np.array([[osm_id, item['x'], item['y']]
                                   for osm_id, item in items.items()
                                   if is_within_lim(item)])
+            if items_crs != []:
+                # Return nearest node indices and distances
+                _, neighbor_nodes = voronoi_kdtree.query(items_crs[:,1:], k=1)
 
-            # Return nearest node indices and distances
-            _, neighbor_nodes = voronoi_kdtree.query(items_crs[:,1:], k=1)
+                # Make dictionary of node allocation
+                neigbor_node_dict = defaultdict(list)
+                for node_ind, ind in zip(neighbor_nodes, range(len(neighbor_nodes))):
+                    node_id = self.network_node_df.loc[node_ind,'id']
+                    osm_id = int(items_crs[ind,0])
+                    neigbor_node_dict[node_id] += [items[osm_id]]
 
-            # Make dictionary of node allocation
-            neigbor_node_dict = defaultdict(list)
-            for node_ind, ind in zip(neighbor_nodes, range(len(neighbor_nodes))):
-                node_id = self.network_node_df.loc[node_ind,'id']
-                osm_id = int(items_crs[ind,0])
-                neigbor_node_dict[node_id] += [items[osm_id]]
-
-            # Add node allocation for this data to main node allocation dictionary
-            for node_id, items in neigbor_node_dict.items():
-                item_allocation[node_id].update({cat:items})
+                # Add node allocation for this data to main node allocation dictionary
+                for node_id, items in neigbor_node_dict.items():
+                    item_allocation[node_id].update({cat:items})
 
         # Make a dataframe with a counter for each node and mapped categories
         item_allocation_count = dict()
